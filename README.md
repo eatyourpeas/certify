@@ -18,7 +18,7 @@ A flexible, reusable Python tool to generate personalized PDF certificates for c
 
 Here's an example of a generated certificate for Dr Simon Chapman attending the STPEG Autumn Meeting 2025:
 
-![Sample Certificate](2025_STPEG_Autumn_Meeting/sample_certificate.pdf)
+![Sample Certificate](2025_STPEG_Autumn_Meeting/sample_certificate_preview.png)
 
 See the [full PDF sample](2025_STPEG_Autumn_Meeting/sample_certificate.pdf) for the complete certificate.
 

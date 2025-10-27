@@ -44,3 +44,4 @@ Thumbs.db
 # Allow sample certificate for documentation
 !2025_STPEG_Autumn_Meeting/
 !2025_STPEG_Autumn_Meeting/*.pdf
+!2025_STPEG_Autumn_Meeting/*.png
