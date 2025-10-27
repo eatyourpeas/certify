@@ -40,3 +40,7 @@ Thumbs.db
 # Project specific
 *.pdf
 .python-version
+
+# Allow sample certificate for documentation
+!2025_STPEG_Autumn_Meeting/
+!2025_STPEG_Autumn_Meeting/*.pdf
