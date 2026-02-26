@@ -58,6 +58,7 @@ uv run python generate_certificate.py
 ```
 
 You will be prompted to enter:
+
 - **Event name** - Name of the course/conference
 - **Event year** - Year (defaults to current year)
 - **Organiser name** - Organization hosting the event (defaults to "South Thames Paediatric Endocrine Group")
@@ -93,6 +94,70 @@ output_file = create_certificate(
 
 print(f"Certificate saved to: {output_file}")
 ```
+
+### Batch Mode (CSV / TXT)
+
+Generate certificates for many attendees at once using `batch_generate.py`.
+
+CSV: By default the importer is optimised for EventBrite exports — it recognises the exact column names
+`Attendee first name` and `Attendee Surname` (including casing and spaces). It will also accept common
+single-column name headers such as `name`, `full_name`, or `attendee_name`.
+
+Additional per-row override columns are supported: `output_filename`, `host_name`, `organiser`, `organiser_logo`, `course_title`, `location`, `date`, `host_hospital`, `host_trust`.
+
+TXT: a simple newline-separated list of attendee names.
+
+Example (EventBrite CSV):
+
+```bash
+python batch_generate.py --input attendees.csv \
+   --event-name "STPEG Autumn Meeting" \
+   --course-title "STPEG Autumn Meeting 2025" \
+   --location "Brighton" \
+   --date "27th May 2025" \
+   --zip
+```
+
+If your CSV uses different column names you can override the field mapping:
+
+```bash
+python batch_generate.py --input attendees.csv \
+   --first-name-field "Given Name" --surname-field "Family Name" \
+   --event-name "STPEG Autumn Meeting" --course-title "..." --location "..." --date "..."
+```
+
+The script creates a folder named `<year>_<eventname>` and writes one PDF per attendee. Use `--zip` to create a ZIP archive containing all generated certificates.
+
+Email preparation
+-----------------
+
+`batch_generate.py` can also prepare email jobs for each attendee so an external service
+or web layer can send them. By default the importer recognises the EventBrite export
+columns `Attendee first name`, `Attendee Surname` and `Attendee email` and will map
+email addresses to generated certificate files.
+
+CLI flags:
+
+- `--email-field` (default: `Attendee email`) — CSV column to read recipient addresses from.
+- `--prepare-emails` — prepare and print a list of email jobs mapping recipient -> certificate file (does not send).
+
+Behaviour notes:
+
+- `generate_batch()` returns a dict including `email_jobs`, an array of simple objects with the keys: `recipient`, `name`, `filepath`, `subject`, `body`, and `meta`. This is intended to be consumed by a service layer (FastAPI/Flask) responsible for sending.
+- Duplicate attendees are deduplicated (one certificate generated) and the run summary logs duplicates and skipped rows.
+- Sending emails is intentionally left to the consuming service. Implementations can use SMTP, Microsoft Graph, or platform-specific adapters to send or create drafts.
+
+Example: prepare email jobs (no send)
+
+```bash
+python batch_generate.py --input attendees.csv \
+   --event-name "STPEG Autumn Meeting" \
+   --course-title "STPEG Autumn Meeting 2025" \
+   --location "Brighton" \
+   --date "27th May 2025" \
+   --prepare-emails
+```
+
 
 ### Quick Test
 
@@ -235,7 +300,6 @@ python generate_certificate.py
 ## Next Steps
 
 - ✅ Customize the `organiser` and `organiser_logo` for your organization
-- 📊 Create batch certificate generation for multiple attendees
 - 🌐 Build a web interface with Flask or FastAPI
 - 💾 Integrate with a database for auto-generating certificates on course completion
 - 📧 Add email functionality to automatically send certificates to attendees
