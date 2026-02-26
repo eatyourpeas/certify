@@ -1,7 +1,8 @@
 [project]
 name = "certify"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.1.1"
+description = "Generate PDF attendance certifications, ready to email, on the command line or in a batch from a CSV file."
+repository = "https://github.com/eatyourpeas/certify"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
