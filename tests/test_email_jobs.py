@@ -8,11 +8,21 @@ def test_generate_email_jobs(tmp_path: Path):
     # Create CSV with EventBrite-style headers
     csv_file = tmp_path / "eb.csv"
     rows = [
-        {"Attendee first name": "Alice", "Attendee Surname": "Example", "Attendee email": "alice@example.com"},
-        {"Attendee first name": "Bob", "Attendee Surname": "Example", "Attendee email": "bob@example.com"},
+        {
+            "Attendee first name": "Alice",
+            "Attendee Surname": "Example",
+            "Attendee email": "alice@example.com",
+        },
+        {
+            "Attendee first name": "Bob",
+            "Attendee Surname": "Example",
+            "Attendee email": "bob@example.com",
+        },
     ]
     with csv_file.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=["Attendee first name", "Attendee Surname", "Attendee email"])
+        writer = csv.DictWriter(
+            fh, fieldnames=["Attendee first name", "Attendee Surname", "Attendee email"]
+        )
         writer.writeheader()
         for r in rows:
             writer.writerow(r)
