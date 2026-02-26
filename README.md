@@ -58,6 +58,7 @@ uv run python generate_certificate.py
 ```
 
 You will be prompted to enter:
+
 - **Event name** - Name of the course/conference
 - **Event year** - Year (defaults to current year)
 - **Organiser name** - Organization hosting the event (defaults to "South Thames Paediatric Endocrine Group")
@@ -93,6 +94,28 @@ output_file = create_certificate(
 
 print(f"Certificate saved to: {output_file}")
 ```
+
+### Batch Mode (CSV / TXT)
+
+Generate certificates for many attendees at once using `batch_generate.py`.
+
+CSV: include a header row with a column for attendee name (common headers: `name`, `full_name`, `attendee_name`). Additional per-row override columns are supported: `output_filename`, `host_name`, `organiser`, `organiser_logo`, `course_title`, `location`, `date`, `host_hospital`, `host_trust`.
+
+TXT: a simple newline-separated list of attendee names.
+
+Example:
+
+```bash
+python batch_generate.py --input attendees.csv \
+   --event-name "STPEG Autumn Meeting" \
+   --course-title "STPEG Autumn Meeting 2025" \
+   --location "Brighton" \
+   --date "27th May 2025" \
+   --zip
+```
+
+The script creates a folder named `<year>_<eventname>` and writes one PDF per attendee. Use `--zip` to create a ZIP archive containing all generated certificates.
+
 
 ### Quick Test
 
@@ -235,7 +258,6 @@ python generate_certificate.py
 ## Next Steps
 
 - ✅ Customize the `organiser` and `organiser_logo` for your organization
-- 📊 Create batch certificate generation for multiple attendees
 - 🌐 Build a web interface with Flask or FastAPI
 - 💾 Integrate with a database for auto-generating certificates on course completion
 - 📧 Add email functionality to automatically send certificates to attendees
