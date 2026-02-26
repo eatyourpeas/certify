@@ -20,6 +20,8 @@ jobs:
           python -m pip install --upgrade pip
           # Install project dependencies and test runner
           pip install reportlab pillow python-docx pytest
+          # Install the package so tests can import project modules
+          pip install -e .
       - name: Run tests
         run: |
           python -m pip install pytest
