@@ -1,5 +1,8 @@
 # Certify - Certificate Generator
 
+![PyPI - Version](https://img.shields.io/pypi/v/certify-attendance?style=flat-square&color=%2398FB98)
+
+
 A flexible, reusable Python tool to generate personalized PDF certificates for course attendees using ReportLab.
 
 **Primarily designed for South Thames Paediatric Endocrine Group (STPEG)**, but built to be customizable for any organization.
