@@ -46,7 +46,9 @@ def read_input_file(path: Path) -> List[Dict[str, str]]:
     with path.open(encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
         for r in reader:
-            normalized = {normalize_key(k): v.strip() for k, v in r.items() if k is not None}
+            normalized = {
+                normalize_key(k): v.strip() for k, v in r.items() if k is not None
+            }
             rows.append(normalized)
     return rows
 
@@ -56,10 +58,14 @@ def pick_name_from_row(row: Dict[str, str]) -> str:
         v = row.get(key)
         if v:
             return v
-    raise ValueError("No attendee name found in row; expected 'name' or 'attendee_name'")
+    raise ValueError(
+        "No attendee name found in row; expected 'name' or 'attendee_name'"
+    )
 
 
-def build_kwargs_from_row(row: Dict[str, str], defaults: Dict[str, str]) -> Dict[str, str]:
+def build_kwargs_from_row(
+    row: Dict[str, str], defaults: Dict[str, str]
+) -> Dict[str, str]:
     kw = defaults.copy()
     # Apply per-row overrides for known keys
     for k in (
@@ -109,7 +115,9 @@ def generate_batch(
         try:
             kw = build_kwargs_from_row(row, defaults)
             output_path = out_dir / kw["output_filename"]
-            print(f"[{i}/{len(rows)}] Generating: {kw['attendee_name']} -> {output_path}")
+            print(
+                f"[{i}/{len(rows)}] Generating: {kw['attendee_name']} -> {output_path}"
+            )
             created = create_certificate(
                 attendee_name=kw["attendee_name"],
                 course_title=kw["course_title"],
@@ -140,10 +148,25 @@ def generate_batch(
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Batch certificate generator")
-    p.add_argument("--input", "-i", required=True, help="Path to CSV or TXT file with attendee names")
-    p.add_argument("--event-name", required=True, help="Event name (used for output folder)")
-    p.add_argument("--event-year", default=str(datetime.now().year), help="Event year (default: current year)")
-    p.add_argument("--course-title", required=True, help="Course/event title to print on certificates")
+    p.add_argument(
+        "--input",
+        "-i",
+        required=True,
+        help="Path to CSV or TXT file with attendee names",
+    )
+    p.add_argument(
+        "--event-name", required=True, help="Event name (used for output folder)"
+    )
+    p.add_argument(
+        "--event-year",
+        default=str(datetime.now().year),
+        help="Event year (default: current year)",
+    )
+    p.add_argument(
+        "--course-title",
+        required=True,
+        help="Course/event title to print on certificates",
+    )
     p.add_argument("--location", required=True, help="Location string for certificates")
     p.add_argument("--date", required=True, help="Date string for certificates")
     p.add_argument("--organiser", default="South Thames Paediatric Endocrine Group")
@@ -151,8 +174,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--host-hospital", default="Royal Alexandra Children's Hospital")
     p.add_argument("--host-trust", default="Brighton & Sussex University Hospitals")
     p.add_argument("--host-name", default="", help="Optional host name for footer")
-    p.add_argument("--output-dir", default=None, help="Optional output directory (overrides generated folder name)")
-    p.add_argument("--zip", action="store_true", help="Create a zip of generated certificates")
+    p.add_argument(
+        "--output-dir",
+        default=None,
+        help="Optional output directory (overrides generated folder name)",
+    )
+    p.add_argument(
+        "--zip", action="store_true", help="Create a zip of generated certificates"
+    )
     return p.parse_args()
 
 
