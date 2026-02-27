@@ -21,6 +21,9 @@ import csv
 from datetime import datetime
 from pathlib import Path
 import zipfile
+import io
+import tempfile
+import os
 from typing import Dict, List
 
 from main import create_certificate
@@ -135,6 +138,7 @@ def generate_batch(
     defaults: Dict[str, str],
     output_dir: Path | None = None,
     make_zip: bool = False,
+    in_memory: bool = False,
     first_name_field: str | None = "Attendee first name",
     surname_field: str | None = "Attendee Surname",
     title_field: str | None = None,
@@ -149,12 +153,16 @@ def generate_batch(
     out_dir = Path(folder_name) if output_dir is None else output_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # disk-mode collectors
     generated_files: List[Path] = []
+    # in-memory collectors (list of dicts with keys: name, filename, pdf_bytes)
+    generated: List[Dict[str, object]] = [] if in_memory else []
     email_map: Dict[str, Dict[str, object]] = {}
     skipped_rows: List[int] = []
     errors: List[str] = []
     duplicates: Dict[str, List[int]] = {}
-    seen_names: Dict[str, Path] = {}
+    seen_names: Dict[str, object] = {}
+    zip_file = None
 
     for i, row in enumerate(rows, start=1):
         try:
@@ -205,44 +213,103 @@ def generate_batch(
                 if email_field:
                     em = row.get(normalize_key(email_field))
                     if em:
-                        email_map.setdefault(
-                            em, {"name": kw["attendee_name"], "path": existing_path}
-                        )
+                        if in_memory:
+                            # existing_path is a filename in in-memory mode
+                            for g in generated:
+                                if isinstance(g, dict) and g.get("filename") == existing_path:
+                                    email_map.setdefault(
+                                        em,
+                                        {
+                                            "name": kw["attendee_name"],
+                                            "pdf_bytes": g.get("pdf_bytes"),
+                                            "filename": g.get("filename"),
+                                        },
+                                    )
+                                    break
+                        else:
+                            email_map.setdefault(
+                                em, {"name": kw["attendee_name"], "path": existing_path}
+                            )
                 continue
 
-            created = create_certificate(
-                attendee_name=kw["attendee_name"],
-                course_title=kw["course_title"],
-                location=kw["location"],
-                date=kw["date"],
-                output_path=str(output_path),
-                organiser=kw.get("organiser", defaults.get("organiser")),
-                organiser_logo=kw.get("organiser_logo", defaults.get("organiser_logo")),
-                host_hospital=kw.get("host_hospital", defaults.get("host_hospital")),
-                host_trust=kw.get("host_trust", defaults.get("host_trust")),
-                host_name=kw.get("host_name", defaults.get("host_name", "")),
-            )
-            generated_files.append(Path(created))
-            seen_names[norm_name] = Path(created)
-            # map email to this file if email exists
-            if email_field:
-                em = row.get(normalize_key(email_field))
-                if em:
-                    email_map.setdefault(
-                        em, {"name": kw["attendee_name"], "path": Path(created)}
-                    )
+            # create certificate on disk or in a temp file (in_memory mode)
+            if in_memory:
+                tf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+                tf.close()
+                tmp_out = Path(tf.name)
+                created = create_certificate(
+                    attendee_name=kw["attendee_name"],
+                    course_title=kw["course_title"],
+                    location=kw["location"],
+                    date=kw["date"],
+                    output_path=str(tmp_out),
+                    organiser=kw.get("organiser", defaults.get("organiser")),
+                    organiser_logo=kw.get("organiser_logo", defaults.get("organiser_logo")),
+                    host_hospital=kw.get("host_hospital", defaults.get("host_hospital")),
+                    host_trust=kw.get("host_trust", defaults.get("host_trust")),
+                    host_name=kw.get("host_name", defaults.get("host_name", "")),
+                )
+                # read bytes and clean up
+                with open(created, "rb") as fh:
+                    pdf_bytes = fh.read()
+                try:
+                    os.unlink(created)
+                except Exception:
+                    pass
+                filename = kw.get("output_filename", Path(created).name)
+                generated.append({"name": kw["attendee_name"], "filename": filename, "pdf_bytes": pdf_bytes})
+                seen_names[norm_name] = filename
+                if email_field:
+                    em = row.get(normalize_key(email_field))
+                    if em:
+                        email_map.setdefault(
+                            em,
+                            {"name": kw["attendee_name"], "pdf_bytes": pdf_bytes, "filename": filename},
+                        )
+            else:
+                created = create_certificate(
+                    attendee_name=kw["attendee_name"],
+                    course_title=kw["course_title"],
+                    location=kw["location"],
+                    date=kw["date"],
+                    output_path=str(output_path),
+                    organiser=kw.get("organiser", defaults.get("organiser")),
+                    organiser_logo=kw.get("organiser_logo", defaults.get("organiser_logo")),
+                    host_hospital=kw.get("host_hospital", defaults.get("host_hospital")),
+                    host_trust=kw.get("host_trust", defaults.get("host_trust")),
+                    host_name=kw.get("host_name", defaults.get("host_name", "")),
+                )
+                generated_files.append(Path(created))
+                seen_names[norm_name] = Path(created)
+                if email_field:
+                    em = row.get(normalize_key(email_field))
+                    if em:
+                        email_map.setdefault(
+                            em, {"name": kw["attendee_name"], "path": Path(created)}
+                        )
         except Exception as e:
             errors.append(f"Row {i}: Error generating certificate: {e}")
 
-    if make_zip and generated_files:
-        zip_file = out_dir.with_suffix(".zip")
-        print(f"Creating ZIP archive: {zip_file}")
-        with zipfile.ZipFile(zip_file, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-            for f in generated_files:
-                zf.write(f, arcname=f.name)
-        print(f"ZIP created: {zip_file}")
+    # Create ZIP archive either on-disk or in-memory
+    if make_zip:
+        if in_memory and generated:
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+                for g in generated:
+                    if isinstance(g, dict):
+                        zf.writestr(g["filename"], g["pdf_bytes"])
+            zip_file = buf.getvalue()
+            print("ZIP created in-memory (bytes)")
+        elif generated_files:
+            zip_file = out_dir.with_suffix(".zip")
+            print(f"Creating ZIP archive: {zip_file}")
+            with zipfile.ZipFile(zip_file, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+                for f in generated_files:
+                    zf.write(f, arcname=f.name)
+            print(f"ZIP created: {zip_file}")
     print("Done.")
-    print(f"Generated {len(generated_files)} certificates in: {out_dir}")
+    gen_count = len(generated) if in_memory else len(generated_files)
+    print(f"Generated {gen_count} certificates in: {out_dir}")
 
     # Summary logs
     if duplicates:
@@ -266,27 +333,32 @@ def generate_batch(
         for em, info in email_map.items():
             name = info.get("name") if isinstance(info, dict) else None
             path = info.get("path") if isinstance(info, dict) else None
+            pdf_bytes = info.get("pdf_bytes") if isinstance(info, dict) else None
             body = f"Dear {name or em},\n\nPlease find attached your certificate for {defaults.get('course_title', '')}.\n\nBest,\n{defaults.get('organiser', '')}"
-            email_jobs.append(
-                {
-                    "recipient": em,
-                    "name": name,
-                    "filepath": str(path) if path is not None else None,
-                    "subject": subject,
-                    "body": body,
-                    "meta": {"event": event_name},
-                }
-            )
+            job: Dict[str, object] = {
+                "recipient": em,
+                "name": name,
+                "subject": subject,
+                "body": body,
+                "meta": {"event": event_name},
+            }
+            if pdf_bytes is not None:
+                job["pdf_bytes"] = pdf_bytes
+                job["filename"] = info.get("filename")
+            else:
+                job["filepath"] = str(path) if path is not None else None
+            email_jobs.append(job)
 
     # Print brief summary for user
     if email_jobs and prepare_emails:
         print("\nPrepared email jobs (not sent):")
         for job in email_jobs:
-            print(f" - {job['recipient']} -> {job['filepath']}")
+            target = job.get("filepath") or job.get("filename") or "<in-memory>"
+            print(f" - {job['recipient']} -> {target}")
 
     return {
-        "generated": generated_files,
-        "zip": zip_file if make_zip and generated_files else None,
+        "generated": generated if in_memory else generated_files,
+        "zip": zip_file if make_zip and (generated if in_memory else generated_files) else None,
         "email_jobs": email_jobs,
         "duplicates": duplicates,
         "skipped_rows": skipped_rows,
