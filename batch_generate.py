@@ -216,7 +216,10 @@ def generate_batch(
                         if in_memory:
                             # existing_path is a filename in in-memory mode
                             for g in generated:
-                                if isinstance(g, dict) and g.get("filename") == existing_path:
+                                if (
+                                    isinstance(g, dict)
+                                    and g.get("filename") == existing_path
+                                ):
                                     email_map.setdefault(
                                         em,
                                         {
@@ -244,8 +247,12 @@ def generate_batch(
                     date=kw["date"],
                     output_path=str(tmp_out),
                     organiser=kw.get("organiser", defaults.get("organiser")),
-                    organiser_logo=kw.get("organiser_logo", defaults.get("organiser_logo")),
-                    host_hospital=kw.get("host_hospital", defaults.get("host_hospital")),
+                    organiser_logo=kw.get(
+                        "organiser_logo", defaults.get("organiser_logo")
+                    ),
+                    host_hospital=kw.get(
+                        "host_hospital", defaults.get("host_hospital")
+                    ),
                     host_trust=kw.get("host_trust", defaults.get("host_trust")),
                     host_name=kw.get("host_name", defaults.get("host_name", "")),
                 )
@@ -257,14 +264,24 @@ def generate_batch(
                 except Exception:
                     pass
                 filename = kw.get("output_filename", Path(created).name)
-                generated.append({"name": kw["attendee_name"], "filename": filename, "pdf_bytes": pdf_bytes})
+                generated.append(
+                    {
+                        "name": kw["attendee_name"],
+                        "filename": filename,
+                        "pdf_bytes": pdf_bytes,
+                    }
+                )
                 seen_names[norm_name] = filename
                 if email_field:
                     em = row.get(normalize_key(email_field))
                     if em:
                         email_map.setdefault(
                             em,
-                            {"name": kw["attendee_name"], "pdf_bytes": pdf_bytes, "filename": filename},
+                            {
+                                "name": kw["attendee_name"],
+                                "pdf_bytes": pdf_bytes,
+                                "filename": filename,
+                            },
                         )
             else:
                 created = create_certificate(
@@ -274,8 +291,12 @@ def generate_batch(
                     date=kw["date"],
                     output_path=str(output_path),
                     organiser=kw.get("organiser", defaults.get("organiser")),
-                    organiser_logo=kw.get("organiser_logo", defaults.get("organiser_logo")),
-                    host_hospital=kw.get("host_hospital", defaults.get("host_hospital")),
+                    organiser_logo=kw.get(
+                        "organiser_logo", defaults.get("organiser_logo")
+                    ),
+                    host_hospital=kw.get(
+                        "host_hospital", defaults.get("host_hospital")
+                    ),
                     host_trust=kw.get("host_trust", defaults.get("host_trust")),
                     host_name=kw.get("host_name", defaults.get("host_name", "")),
                 )
@@ -358,7 +379,11 @@ def generate_batch(
 
     return {
         "generated": generated if in_memory else generated_files,
-        "zip": zip_file if make_zip and (generated if in_memory else generated_files) else None,
+        "zip": (
+            zip_file
+            if make_zip and (generated if in_memory else generated_files)
+            else None
+        ),
         "email_jobs": email_jobs,
         "duplicates": duplicates,
         "skipped_rows": skipped_rows,
