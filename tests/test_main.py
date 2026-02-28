@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from main import create_certificate
+from certify import create_certificate
 
 
 def test_create_certificate_generates_pdf(tmp_path: Path):
