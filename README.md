@@ -57,7 +57,8 @@ This project uses `uv` as the Python package manager for fast, reliable dependen
 ### Interactive Mode (Recommended)
 
 ```bash
-uv run python generate_certificate.py
+# Interactive (packaged)
+uv run python -m certify.generate_certificate
 ```
 
 You will be prompted to enter:
@@ -80,7 +81,7 @@ You will be prompted to enter:
 Use the `create_certificate()` function in your own scripts:
 
 ```python
-from main import create_certificate
+from certify import create_certificate
 
 output_file = create_certificate(
     attendee_name="Jane Doe",
@@ -113,7 +114,7 @@ TXT: a simple newline-separated list of attendee names.
 Example (EventBrite CSV):
 
 ```bash
-python batch_generate.py --input attendees.csv \
+python -m certify.batch_generate --input attendees.csv \
    --event-name "STPEG Autumn Meeting" \
    --course-title "STPEG Autumn Meeting 2025" \
    --location "Brighton" \
@@ -124,15 +125,16 @@ python batch_generate.py --input attendees.csv \
 If your CSV uses different column names you can override the field mapping:
 
 ```bash
-python batch_generate.py --input attendees.csv \
+python -m certify.batch_generate --input attendees.csv \
    --first-name-field "Given Name" --surname-field "Family Name" \
    --event-name "STPEG Autumn Meeting" --course-title "..." --location "..." --date "..."
 ```
 
 The script creates a folder named `<year>_<eventname>` and writes one PDF per attendee. Use `--zip` to create a ZIP archive containing all generated certificates.
 
-Email preparation
 -----------------
+
+#### Email preparation
 
 `batch_generate.py` can also prepare email jobs for each attendee so an external service
 or web layer can send them. By default the importer recognises the EventBrite export
@@ -161,13 +163,13 @@ python batch_generate.py --input attendees.csv \
    --prepare-emails
 ```
 
-
 ### Quick Test
 
 To test with default STPEG values:
 
 ```bash
-uv run python main.py
+# Quick test (packaged entry points)
+uv run python -m certify.generate_certificate
 ```
 
 This generates `certificate_sample.pdf` with example data.
@@ -231,15 +233,18 @@ Certify/
 
 ```
 Certify/
-├── main.py                    # Core certificate generation function
-├── generate_certificate.py    # Interactive CLI tool
-├── pyproject.toml            # Project configuration & dependencies
-├── uv.lock                   # Locked dependency versions
-├── logo.png                  # Default STPEG logo (customize for your organization)
-├── LICENSE                   # MIT License
-├── README.md                 # This file
-└── [year_eventname]/         # Auto-generated folders for organized certificates
-    └── certificates.pdf
+├── main.py                    # Core certificate generation function (kept at repo root)
+├── certify/                   # Package containing the batch & CLI modules
+│   ├── __init__.py
+│   ├── batch_generate.py
+│   └── generate_certificate.py
+├── pyproject.toml             # Project configuration & dependencies
+├── uv.lock                    # Locked dependency versions
+├── logo.png                   # Default STPEG logo (customize for your organization)
+├── LICENSE                    # MIT License
+├── README.md                  # This file
+└── [year_eventname]/          # Auto-generated folders for organized certificates
+   └── certificates.pdf
 ```
 
 ## Project Management with `uv`

@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
-"""
-Interactive certificate generator.
-Prompts user for attendee details and generates a PDF certificate.
-Organizes certificates into folders named year_eventname.
+"""Interactive certificate generator (packaged).
+
+Packaged copy of the top-level `generate_certificate.py` to live under the
+`certify` package so consumers can `import certify`.
 """
 
 from main import create_certificate
@@ -13,12 +12,10 @@ from datetime import datetime
 
 
 def get_user_input():
-    """Prompt user for certificate details."""
     print("\n" + "=" * 60)
     print("CERTIFICATE GENERATOR - Interactive Mode")
     print("=" * 60 + "\n")
 
-    # Get event details first for folder organization
     event_name = input("Enter event name (for folder organization): ").strip()
     if not event_name:
         print("Error: Event name cannot be empty")
@@ -28,7 +25,6 @@ def get_user_input():
     if not event_year:
         event_year = str(datetime.now().year)
     else:
-        # Validate year is 4 digits
         if not event_year.isdigit() or len(event_year) != 4:
             print("Error: Year must be 4 digits (e.g., 2024)")
             sys.exit(1)
@@ -77,7 +73,9 @@ def get_user_input():
     if not host_trust:
         host_trust = "Brighton & Sussex University Hospitals"
 
-    host_name = input("Enter host name (e.g., 'Dr Charlotte Jackson') [optional]: ").strip()
+    host_name = input(
+        "Enter host name (e.g., 'Dr Charlotte Jackson') [optional]: "
+    ).strip()
 
     output_filename = input(
         "Enter output filename [default: {attendee_name}_certificate.pdf]: "
@@ -104,20 +102,14 @@ def get_user_input():
 
 
 def main():
-    """Main entry point."""
     try:
-        # Get user input
         details = get_user_input()
-
-        # Create folder structure: year_eventname
-        folder_name = f"{details['event_year']}_{details['event_name'].replace(' ', '_')}"
+        folder_name = (
+            f"{details['event_year']}_{details['event_name'].replace(' ', '_')}"
+        )
         folder_path = Path(folder_name)
         folder_path.mkdir(exist_ok=True)
-
-        # Full output path
         output_path = folder_path / details["output_filename"]
-
-        # Generate certificate
         print("\nGenerating certificate...", end=" ", flush=True)
         output_file = create_certificate(
             attendee_name=details["attendee_name"],
@@ -132,8 +124,6 @@ def main():
             host_name=details["host_name"],
         )
         print("✓")
-
-        # Display summary
         print("\n" + "=" * 60)
         print("CERTIFICATE GENERATED SUCCESSFULLY!")
         print("=" * 60)

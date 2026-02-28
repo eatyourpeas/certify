@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 import zipfile
 
-from batch_generate import generate_batch
+from certify.batch_generate import generate_batch
 
 
 def test_generate_batch_creates_pdfs_and_zip(tmp_path: Path):

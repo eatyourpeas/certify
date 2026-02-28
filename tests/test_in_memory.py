@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 
-from batch_generate import generate_batch
+from certify.batch_generate import generate_batch
 
 
 def test_generate_batch_in_memory(tmp_path: Path):

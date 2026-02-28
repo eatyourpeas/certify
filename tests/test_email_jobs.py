@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 
-from batch_generate import generate_batch
+from certify.batch_generate import generate_batch
 
 
 def test_generate_email_jobs(tmp_path: Path):
