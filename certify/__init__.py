@@ -7,12 +7,6 @@ or `import certify` for convenience.
 
 from .batch_generate import generate_batch  # re-export
 from .generate_certificate import main as interactive_main  # convenience
-
-# Expose the create_certificate helper from the top-level `main.py` for
-# compatibility (best-effort; main.py stays at the repo root per request).
-try:
-    from main import create_certificate  # type: ignore
-except Exception:  # pragma: no cover - best-effort shim
-    create_certificate = None
+from .generate_certificate import create_certificate  # re-export
 
 __all__ = ["generate_batch", "interactive_main", "create_certificate"]

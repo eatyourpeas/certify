@@ -114,7 +114,7 @@ TXT: a simple newline-separated list of attendee names.
 Example (EventBrite CSV):
 
 ```bash
-python -m certify.batch_generate --input attendees.csv \
+uv run python -m certify.batch_generate --input attendees.csv \
    --event-name "STPEG Autumn Meeting" \
    --course-title "STPEG Autumn Meeting 2025" \
    --location "Brighton" \
@@ -125,7 +125,7 @@ python -m certify.batch_generate --input attendees.csv \
 If your CSV uses different column names you can override the field mapping:
 
 ```bash
-python -m certify.batch_generate --input attendees.csv \
+uv run python -m certify.batch_generate --input attendees.csv \
    --first-name-field "Given Name" --surname-field "Family Name" \
    --event-name "STPEG Autumn Meeting" --course-title "..." --location "..." --date "..."
 ```
@@ -155,7 +155,7 @@ Behaviour notes:
 Example: prepare email jobs (no send)
 
 ```bash
-python batch_generate.py --input attendees.csv \
+uv run python -m certify.batch_generate --input attendees.csv \
    --event-name "STPEG Autumn Meeting" \
    --course-title "STPEG Autumn Meeting 2025" \
    --location "Brighton" \
@@ -188,7 +188,7 @@ This generates `certificate_sample.pdf` with example data.
    - Or specify custom values every time via interactive mode
 
 3. **Certificate Appearance:**
-   Edit `main.py` to customize:
+   Edit `certify/generate_certificate.py` to customize:
    - **Colors**: Line 35 (`org_color = colors.HexColor("#003366")`)
    - **Fonts**: Lines 34-35
    - **Layout/positioning**: Adjust the `inch` values in draw functions
@@ -197,7 +197,7 @@ This generates `certificate_sample.pdf` with example data.
 ### Example: Using a Different Logo
 
 ```bash
-uv run python generate_certificate.py
+uv run python -m certify.generate_certificate
 # When prompted:
 # Organiser logo: /path/to/my_logo.png
 ```
@@ -205,7 +205,7 @@ uv run python generate_certificate.py
 ### Example: Using for a Different Organization
 
 ```bash
-uv run python generate_certificate.py
+uv run python -m certify.generate_certificate
 # When prompted:
 # Event name: AI Workshop 2024
 # Organiser name: TechCorp Training Institute
@@ -233,11 +233,11 @@ Certify/
 
 ```
 Certify/
-├── main.py                    # Core certificate generation function (kept at repo root)
-├── certify/                   # Package containing the batch & CLI modules
-│   ├── __init__.py
-│   ├── batch_generate.py
-│   └── generate_certificate.py
+├── certify/                   # Main package
+│   ├── __init__.py           # Package exports (create_certificate, generate_batch)
+│   ├── generate_certificate.py # Core certificate generation function
+│   └── batch_generate.py      # Batch processing and email job preparation
+├── tests/                     # Unit tests
 ├── pyproject.toml             # Project configuration & dependencies
 ├── uv.lock                    # Locked dependency versions
 ├── logo.png                   # Default STPEG logo (customize for your organization)
@@ -295,14 +295,14 @@ export PATH="$HOME/.local/bin:$PATH"
 Make sure you're using `uv run`:
 
 ```bash
-uv run python generate_certificate.py
+uv run python -m certify.generate_certificate
 ```
 
-Or activate the virtual environment:
+Or activate the virtual environment and use the module syntax:
 
 ```bash
 source .venv/bin/activate
-python generate_certificate.py
+python -m certify.generate_certificate
 ```
 
 ## Next Steps

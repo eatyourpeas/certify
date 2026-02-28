@@ -16,7 +16,7 @@ import tempfile
 import os
 from typing import Dict, List
 
-from main import create_certificate
+from .generate_certificate import create_certificate
 
 
 def normalize_key(k: str) -> str:
