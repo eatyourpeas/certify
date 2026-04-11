@@ -12,6 +12,7 @@ def create_certificate(
     course_title: str,
     location: str,
     date: str,
+    subtitle: str = "",
     output_path: str = "certificate.pdf",
     organiser: str = "South Thames Paediatric Endocrine Group",
     organiser_logo: str = "logo.png",
@@ -94,12 +95,20 @@ def create_certificate(
     c.setFont(title_font, 20)
     c.setFillColor(org_color)
     c.drawCentredString(width / 2, height / 2 - 0.3 * inch, course_title)
-    
-    # Location and date
+
+    # Optional subtitle below the course title
+    if subtitle:
+        c.setFont(body_font, 16)
+        c.setFillColor(colors.black)
+        c.drawCentredString(width / 2, height / 2 - 0.8 * inch, subtitle)
+
+    # Location and date (shift if subtitle present)
     c.setFont(body_font, 16)
     c.setFillColor(colors.black)
-    c.drawCentredString(width / 2, height / 2 - 1 * inch, location)
-    c.drawCentredString(width / 2, height / 2 - 1.5 * inch, date)
+    loc_y = height / 2 - 1 * inch if not subtitle else height / 2 - 1.3 * inch
+    date_y = height / 2 - 1.5 * inch if not subtitle else height / 2 - 1.8 * inch
+    c.drawCentredString(width / 2, loc_y, location)
+    c.drawCentredString(width / 2, date_y, date)
     
     # Host information at the bottom
     footer_y = 1.5 * inch

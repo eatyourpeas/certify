@@ -11,8 +11,8 @@ A flexible, reusable Python tool to generate personalized PDF certificates for c
 - ✨ Generate professional PDF certificates from command line
 - 📝 Customizable organizer name and logo
 - 🎨 Professional styling with organization branding
-- � Automatic folder organization by year and event
-- �🔧 Easy-to-use interactive mode
+- 📆 Automatic folder organisation by year and event
+- 🔧 Easy-to-use interactive mode
 - 📦 Built with ReportLab for high-quality PDF output
 - 🔄 Fully reusable - designed for any organization
 
@@ -68,6 +68,7 @@ You will be prompted to enter:
 - **Organiser logo** - Path to PNG logo file (defaults to "logo.png")
 - **Attendee's name** - Name of the certificate recipient
 - **Course/event title** - Title of the course attended
+- **Subtitle** - Subtitle displayed below the course title (optional)
 - **Location** - Where the event took place
 - **Date** - Event date (e.g., "27th May 2024")
 - **Host hospital** - Hospital name (optional, for institutional context)
@@ -85,6 +86,7 @@ from certify import create_certificate
 output_file = create_certificate(
     attendee_name="Jane Doe",
     course_title="Endocrinology Workshop",
+   subtitle="Advanced Concepts in Paediatric Endocrinology",
     location="Royal Alexandra Children's Hospital",
     date="27th May 2024",
     organiser="Your Organization Name",
@@ -106,7 +108,7 @@ CSV: By default the importer is optimised for EventBrite exports — it recognis
 `Attendee first name` and `Attendee Surname` (including casing and spaces). It will also accept common
 single-column name headers such as `name`, `full_name`, or `attendee_name`.
 
-Additional per-row override columns are supported: `output_filename`, `host_name`, `organiser`, `organiser_logo`, `course_title`, `location`, `date`, `host_hospital`, `host_trust`.
+Additional per-row override columns are supported: `output_filename`, `host_name`, `organiser`, `organiser_logo`, `course_title`, `subtitle`, `location`, `date`, `host_hospital`, `host_trust`.
 
 TXT: a simple newline-separated list of attendee names.
 
