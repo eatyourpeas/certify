@@ -20,6 +20,7 @@ def create_certificate(
     course_title: str,
     location: str,
     date: str,
+    subtitle: str = "",
     output_path: str = "certificate.pdf",
     organiser: str = "South Thames Paediatric Endocrine Group",
     organiser_logo: str = "logo.png",
@@ -103,11 +104,19 @@ def create_certificate(
     c.setFillColor(org_color)
     c.drawCentredString(width / 2, height / 2 - 0.3 * inch, course_title)
 
-    # Location and date
+    # Optional subtitle below the course title
+    if subtitle:
+        c.setFont(body_font, 16)
+        c.setFillColor(colors.black)
+        c.drawCentredString(width / 2, height / 2 - 0.8 * inch, subtitle)
+
+    # Location and date (shift if subtitle present)
     c.setFont(body_font, 16)
     c.setFillColor(colors.black)
-    c.drawCentredString(width / 2, height / 2 - 1 * inch, location)
-    c.drawCentredString(width / 2, height / 2 - 1.5 * inch, date)
+    loc_y = height / 2 - 1 * inch if not subtitle else height / 2 - 1.3 * inch
+    date_y = height / 2 - 1.5 * inch if not subtitle else height / 2 - 1.8 * inch
+    c.drawCentredString(width / 2, loc_y, location)
+    c.drawCentredString(width / 2, date_y, date)
 
     # Host information at the bottom
     footer_y = 1.5 * inch
@@ -176,6 +185,8 @@ def get_user_input():
         print("Error: Course title cannot be empty")
         sys.exit(1)
 
+    subtitle = input("Enter subtitle (optional, display below course title): ").strip()
+
     location = input("Enter location: ").strip()
     if not location:
         print("Error: Location cannot be empty")
@@ -217,6 +228,7 @@ def get_user_input():
         "organiser_logo": organiser_logo,
         "attendee_name": attendee_name,
         "course_title": course_title,
+        "subtitle": subtitle,
         "location": location,
         "date": date,
         "host_hospital": host_hospital,
@@ -239,6 +251,7 @@ def main():
         output_file = create_certificate(
             attendee_name=details["attendee_name"],
             course_title=details["course_title"],
+            subtitle=details.get("subtitle", ""),
             location=details["location"],
             date=details["date"],
             output_path=str(output_path),

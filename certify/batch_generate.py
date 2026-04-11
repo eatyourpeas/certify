@@ -83,6 +83,7 @@ def build_kwargs_from_row(
     for k in (
         "organiser",
         "organiser_logo",
+        "subtitle",
         "course_title",
         "location",
         "date",
@@ -209,6 +210,7 @@ def generate_batch(
                 created = create_certificate(
                     attendee_name=kw["attendee_name"],
                     course_title=kw["course_title"],
+                    subtitle=kw.get("subtitle", defaults.get("subtitle", "")),
                     location=kw["location"],
                     date=kw["date"],
                     output_path=str(tmp_out),
@@ -252,6 +254,7 @@ def generate_batch(
                 created = create_certificate(
                     attendee_name=kw["attendee_name"],
                     course_title=kw["course_title"],
+                    subtitle=kw.get("subtitle", defaults.get("subtitle", "")),
                     location=kw["location"],
                     date=kw["date"],
                     output_path=str(output_path),
